@@ -3,30 +3,32 @@ name: Build Il2CppDumper
 on:
   push:
     branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v6
-    
+    - uses: actions/checkout@v4
+
     - name: Setup NDK
       run: |
         wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
         unzip -q android-ndk-r25b-linux.zip
         echo "NDK=$(pwd)/android-ndk-r25b" >> $GITHUB_ENV
-        
+
     - name: Build
       run: |
-        $NDK/ndk-build NDK_PROJECT_PATH=. APP_ABI=all
-        
+        chmod +x $NDK/ndk-build
+        $NDK/ndk-build NDK_PROJECT_PATH=. APP_ABI=arm64-v8a
+
     - name: Copy output
       run: |
         mkdir -p artifacts
-        cp -r libs/* artifacts/
-        
-    - uses: actions/upload-artifact@v6
+        cp -r libs/arm64-v8a/* artifacts/
+
+    - uses: actions/upload-artifact@v4
       with:
-        name: Il2CppDumper-v2.0.0
+        name: libil2cppdumper-arm64
         path: artifacts/
+        if-no-files-found: error
